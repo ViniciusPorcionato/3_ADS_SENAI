@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel OEE Industrial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Eficiência Global (OEE)</h1>
+                <p class="text-gray-400 mt-1">Monitoramento de Turno em Tempo Real</p>
+            </div>
+            <div id="status-conexao" class="px-4 py-2 rounded-full font-semibold text-sm bg-yellow-500/20 text-yellow-400 border border-yellow-500/50">
+                Aguardando Conexão...
+            </div>
+        </header>
+
+        <div class="bg-gray-800 rounded-2xl p-8 mb-8 border border-gray-700 shadow-lg text-center">
+            <h2 class="text-gray-400 text-xl mb-2 font-medium">OEE Global</h2>
+            <div id="oee-valor" class="text-7xl font-bold text-blue-400 transition-all duration-500">--%</div>
+            <p id="ultima-atualizacao" class="text-gray-500 text-sm mt-4">Última atualização: --:--:--</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow">
+                <h3 class="text-gray-400 text-lg mb-2">Disponibilidade</h3>
+                <div id="disp-valor" class="text-4xl font-bold text-white transition-all duration-500">--%</div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow">
+                <h3 class="text-gray-400 text-lg mb-2">Performance</h3>
+                <div id="perf-valor" class="text-4xl font-bold text-white transition-all duration-500">--%</div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow">
+                <h3 class="text-gray-400 text-lg mb-2">Qualidade</h3>
+                <div id="qual-valor" class="text-4xl font-bold text-white transition-all duration-500">--%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8000');
+        
+        const statusEl = document.getElementById('status-conexao');
+
+        socket.onopen = function(e) {
+            statusEl.textContent = "Conectado ao MES";
+            statusEl.className = "px-4 py-2 rounded-full font-semibold text-sm bg-green-500/20 text-green-400 border border-green-500/50";
+        };
+
+        socket.onmessage = function(event) {
+            const dados = JSON.parse(event.data);
+            const ind = dados.Indicadores;
+
+            const getColor = (val) => val >= 85 ? 'text-green-400' : (val >= 60 ? 'text-yellow-400' : 'text-red-400');
+
+            document.getElementById('oee-valor').textContent = ind.OEE_Global.toFixed(1) + '%';
+            document.getElementById('oee-valor').className = `text-7xl font-bold transition-all duration-500 ${getColor(ind.OEE_Global)}`;
+
+            document.getElementById('disp-valor').textContent = ind.Disponibilidade.toFixed(1) + '%';
+            document.getElementById('perf-valor').textContent = ind.Performance.toFixed(1) + '%';
+            document.getElementById('qual-valor').textContent = ind.Qualidade.toFixed(1) + '%';
+            
+            document.getElementById('ultima-atualizacao').textContent = "Última atualização: " + dados.timestamp;
+        };
+
+        socket.onclose = function(event) {
+            statusEl.textContent = "Servidor Offline";
+            statusEl.className = "px-4 py-2 rounded-full font-semibold text-sm bg-red-500/20 text-red-400 border border-red-500/50";
+        };
+    </script>
+</body>
+</html>
