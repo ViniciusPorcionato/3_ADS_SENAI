@@ -12,6 +12,12 @@ import { useFonts, Poppins_400Regular } from "@expo-google-fonts/poppins"
 //Menu SOBRE
 import TelaSobre from "./telas/Sobre"
 
+//Menu PRODUTOS
+import TelaProdutos from "./telas/Produtos"
+
+//Menu PERFIL
+import TelaPerfil from "./telas/Perfil"
+
 //MENU - BOTTOM TABS
 const Tab = createBottomTabNavigator();
 
@@ -40,8 +46,8 @@ function Menu(){
             })}
           >
             <Tab.Screen name="Sobre" component={TelaSobre}/>
-            <Tab.Screen name="Produtos" component={TelaSobre}/>
-            <Tab.Screen name="Perfil" component={TelaSobre}/>
+            <Tab.Screen name="Produtos" component={TelaProdutos}/>
+            <Tab.Screen name="Perfil" component={TelaPerfil}/>
         </Tab.Navigator>
 }
 
